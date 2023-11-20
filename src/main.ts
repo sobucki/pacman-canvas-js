@@ -15,4 +15,4 @@ const map = [
 
 const game = new Game();
 game.addMap(map);
-game.draw();
+game.animate();

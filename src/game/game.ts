@@ -1,4 +1,4 @@
-import { Boundary, drawBoundary } from "../boundary/boundary";
+import { Boundary } from "../boundary/boundary";
 import { Player } from "../player/player";
 
 export class Game {
@@ -6,13 +6,14 @@ export class Game {
   map: string[][] | undefined;
   boundaries: Boundary[];
   player: Player;
+  canvas: HTMLCanvasElement;
 
   constructor() {
-    const canvas = document.getElementById("canvas") as HTMLCanvasElement;
-    canvas.width = innerWidth;
-    canvas.height = innerHeight;
+    this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
+    this.canvas.width = innerWidth;
+    this.canvas.height = innerHeight;
 
-    const context2D = canvas && canvas.getContext("2d");
+    const context2D = this.canvas && this.canvas.getContext("2d");
 
     if (context2D === null) throw new Error("Context 2D not found");
 
@@ -25,7 +26,7 @@ export class Game {
         x: Boundary.width + Boundary.width / 2,
         y: Boundary.height + Boundary.height / 2,
       },
-      velocity: 0,
+      velocity: { x: 0, y: 0 },
     });
   }
 
@@ -54,8 +55,10 @@ export class Game {
     );
   }
 
-  draw() {
+  public animate() {
+    requestAnimationFrame(() => this.animate());
+    this.context?.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.boundaries.forEach((boundary) => boundary.draw());
-    this.player.draw();
+    this.player.update();
   }
 }
