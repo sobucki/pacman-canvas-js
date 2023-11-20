@@ -2,39 +2,28 @@ import { Direction, Position } from "../common/types";
 
 type PlayerProps = {
   position: Position;
-  velocity: Position;
   context: CanvasRenderingContext2D;
-};
-
-type ActiveDirections = {
-  [Property in Direction]: boolean;
-} & {
-  stackKeys: Array<Direction>;
 };
 
 export class Player {
   static radiusSize = 15;
+  static speed = 5;
   position: Position;
-  velocity: Position;
   radius: number;
   context: CanvasRenderingContext2D;
 
-  currentDirection: ActiveDirections;
+  activeDirections: Set<Direction>;
+  directionStack: Array<Direction>;
 
-  constructor({ position, velocity, context }: PlayerProps) {
+  constructor({ position, context }: PlayerProps) {
+    if (!context || !(context instanceof CanvasRenderingContext2D)) {
+      throw new Error("Invalid or null 2D context provided");
+    }
+
     this.position = position;
-    this.velocity = velocity;
     this.radius = Player.radiusSize;
-    this.currentDirection = {
-      DOWN: false,
-      LEFT: false,
-      RIGHT: false,
-      UP: false,
-      stackKeys: [],
-    };
-
-    if (context === null) throw new Error("Context 2D not found");
-
+    this.activeDirections = new Set();
+    this.directionStack = [];
     this.context = context as CanvasRenderingContext2D;
 
     this.initializePlayerController();
@@ -46,46 +35,41 @@ export class Player {
   }
 
   private addToStack(direction: Direction) {
-    if (!this.currentDirection.stackKeys?.includes(direction))
-      this.currentDirection.stackKeys?.push(direction);
+    if (!this.directionStack.includes(direction)) {
+      this.directionStack.push(direction);
+    }
   }
 
-  private removeOfStack(direction: Direction) {
-    if (this.currentDirection.stackKeys?.includes(direction))
-      this.currentDirection.stackKeys = this.currentDirection.stackKeys.filter(
-        (value) => value !== direction
-      );
+  private removeFromStack(direction: Direction) {
+    this.directionStack = this.directionStack.filter((d) => d !== direction);
   }
 
   private selectMove(key: string, active: boolean) {
-    switch (key.toLocaleLowerCase()) {
-      case "w":
-        this.currentDirection[Direction.UP] = active;
-        active
-          ? this.addToStack(Direction.UP)
-          : this.removeOfStack(Direction.UP);
-        break;
-      case "a":
-        this.currentDirection[Direction.LEFT] = active;
-        active
-          ? this.addToStack(Direction.LEFT)
-          : this.removeOfStack(Direction.LEFT);
-        break;
-      case "s":
-        this.currentDirection[Direction.DOWN] = active;
-        active
-          ? this.addToStack(Direction.DOWN)
-          : this.removeOfStack(Direction.DOWN);
-        break;
-      case "d":
-        this.currentDirection[Direction.RIGHT] = active;
-        active
-          ? this.addToStack(Direction.RIGHT)
-          : this.removeOfStack(Direction.RIGHT);
-        break;
+    const direction = this.keyToDirection(key);
 
+    if (!direction) return;
+
+    if (active) {
+      this.activeDirections.add(direction);
+      this.addToStack(direction);
+    } else {
+      this.activeDirections.delete(direction);
+      this.removeFromStack(direction);
+    }
+  }
+
+  private keyToDirection(key: string): Direction | null {
+    switch (key.toLowerCase()) {
+      case "w":
+        return Direction.UP;
+      case "a":
+        return Direction.LEFT;
+      case "s":
+        return Direction.DOWN;
+      case "d":
+        return Direction.RIGHT;
       default:
-        break;
+        return null;
     }
   }
 
@@ -109,17 +93,25 @@ export class Player {
   }
 
   moveToDirection() {
-    const lastDirection =
-      this.currentDirection.stackKeys[
-        this.currentDirection.stackKeys.length - 1
-      ] || undefined;
-    if (this.currentDirection.UP && lastDirection === Direction.UP)
-      this.position.y += -5;
-    if (this.currentDirection.LEFT && lastDirection === Direction.LEFT)
-      this.position.x += -5;
-    if (this.currentDirection.DOWN && lastDirection === Direction.DOWN)
-      this.position.y += 5;
-    if (this.currentDirection.RIGHT && lastDirection === Direction.RIGHT)
-      this.position.x += 5;
+    if (this.directionStack.length === 0) return;
+
+    const lastDirection = this.directionStack[this.directionStack.length - 1];
+
+    if (this.activeDirections.has(lastDirection)) {
+      switch (lastDirection) {
+        case Direction.UP:
+          this.position.y -= 5;
+          break;
+        case Direction.LEFT:
+          this.position.x -= 5;
+          break;
+        case Direction.DOWN:
+          this.position.y += 5;
+          break;
+        case Direction.RIGHT:
+          this.position.x += 5;
+          break;
+      }
+    }
   }
 }

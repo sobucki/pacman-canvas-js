@@ -26,7 +26,6 @@ export class Game {
         x: Boundary.width + Boundary.width / 2,
         y: Boundary.height + Boundary.height / 2,
       },
-      velocity: { x: 0, y: 0 },
     });
   }
 
