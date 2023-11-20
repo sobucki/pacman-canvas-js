@@ -13,13 +13,13 @@ export class Wall {
   height: number;
   currentContext: CanvasRenderingContext2D;
 
-  static width = 40;
-  static height = 40;
+  static width = 30;
+  static height = 30;
 
   constructor({ position, context }: BoundaryProps) {
     this.position = position;
-    this.width = 40;
-    this.height = 40;
+    this.width = Wall.width;
+    this.height = Wall.height;
     this.currentContext = context;
   }
 

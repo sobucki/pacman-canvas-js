@@ -5,8 +5,6 @@ import { Wall } from "./objects/wall";
 export class Game {
   context: CanvasRenderingContext2D | undefined;
   map: string[][] | undefined;
-  // walls: Wall[];
-  // player: Player;
   canvas: HTMLCanvasElement;
   world: World;
 
@@ -39,7 +37,7 @@ export class Game {
     this.map?.forEach((row, rowIndex) =>
       row.forEach((boundary, boundaryIndex) => {
         switch (boundary) {
-          case "-":
+          case "*":
             this.world.walls.push(
               new Wall({
                 context: this.context as CanvasRenderingContext2D,
@@ -61,7 +59,7 @@ export class Game {
   public animate() {
     requestAnimationFrame(() => this.animate());
     this.context?.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.world.player.update();
+    this.world.player.update(this.world);
     this.world.walls.forEach((boundary) => boundary.draw());
   }
 }
