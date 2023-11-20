@@ -1,12 +1,14 @@
-import { Boundary } from "../boundary/boundary";
-import { Player } from "../player/player";
+import { World } from "../common/types";
+import { Player } from "./objects/player";
+import { Wall } from "./objects/wall";
 
 export class Game {
   context: CanvasRenderingContext2D | undefined;
   map: string[][] | undefined;
-  boundaries: Boundary[];
-  player: Player;
+  // walls: Wall[];
+  // player: Player;
   canvas: HTMLCanvasElement;
+  world: World;
 
   constructor() {
     this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -19,14 +21,16 @@ export class Game {
 
     this.context = context2D;
 
-    this.boundaries = [];
-    this.player = new Player({
-      context: this.context,
-      position: {
-        x: Boundary.width + Boundary.width / 2,
-        y: Boundary.height + Boundary.height / 2,
-      },
-    });
+    this.world = {
+      walls: [],
+      player: new Player({
+        context: this.context,
+        position: {
+          x: Wall.width + Wall.width / 2,
+          y: Wall.height + Wall.height / 2,
+        },
+      }),
+    };
   }
 
   public addMap(map: string[][]) {
@@ -36,12 +40,12 @@ export class Game {
       row.forEach((boundary, boundaryIndex) => {
         switch (boundary) {
           case "-":
-            this.boundaries.push(
-              new Boundary({
+            this.world.walls.push(
+              new Wall({
                 context: this.context as CanvasRenderingContext2D,
                 position: {
-                  x: Boundary.width * boundaryIndex,
-                  y: Boundary.height * rowIndex,
+                  x: Wall.width * boundaryIndex,
+                  y: Wall.height * rowIndex,
                 },
               })
             );
@@ -57,7 +61,7 @@ export class Game {
   public animate() {
     requestAnimationFrame(() => this.animate());
     this.context?.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.boundaries.forEach((boundary) => boundary.draw());
-    this.player.update();
+    this.world.player.update();
+    this.world.walls.forEach((boundary) => boundary.draw());
   }
 }

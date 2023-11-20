@@ -1,4 +1,4 @@
-import { Direction, Position } from "../common/types";
+import { Direction, Position } from "../../../common/types";
 
 type PlayerProps = {
   position: Position;

@@ -1,4 +1,4 @@
-import { Position } from "../common/types";
+import { Position } from "../../../common/types";
 
 type BoundaryProps = {
   position: Position;
@@ -7,7 +7,7 @@ type BoundaryProps = {
   context: CanvasRenderingContext2D;
 };
 
-export class Boundary {
+export class Wall {
   position: Position;
   width: number;
   height: number;
@@ -38,7 +38,7 @@ export const drawBoundary = (
   { x, y }: Position,
   context: CanvasRenderingContext2D
 ) => {
-  new Boundary({
+  new Wall({
     context,
     position: {
       x,
