@@ -1,5 +1,6 @@
 import { Direction, Position, World } from "../../../common/types";
 import { Wall } from "../wall";
+import { InputHandler } from "./input-handler";
 
 type PlayerProps = {
   position: Position;
@@ -12,9 +13,7 @@ export class Player {
   position: Position;
   radius: number;
   context: CanvasRenderingContext2D;
-
-  activeDirections: Set<Direction>;
-  directionStack: Array<Direction>;
+  inputHandler: InputHandler;
 
   constructor({ position, context }: PlayerProps) {
     if (!context || !(context instanceof CanvasRenderingContext2D)) {
@@ -23,9 +22,8 @@ export class Player {
 
     this.position = position;
     this.radius = Player.radiusSize;
-    this.activeDirections = new Set();
-    this.directionStack = [];
     this.context = context as CanvasRenderingContext2D;
+    this.inputHandler = new InputHandler();
 
     this.initializePlayerController();
   }
@@ -36,13 +34,15 @@ export class Player {
   }
 
   private addToStack(direction: Direction) {
-    if (!this.directionStack.includes(direction)) {
-      this.directionStack.push(direction);
+    if (!this.inputHandler.directionStack.includes(direction)) {
+      this.inputHandler.directionStack.push(direction);
     }
   }
 
   private removeFromStack(direction: Direction) {
-    this.directionStack = this.directionStack.filter((d) => d !== direction);
+    this.inputHandler.directionStack = this.inputHandler.directionStack.filter(
+      (d) => d !== direction
+    );
   }
 
   private selectMove(key: string, active: boolean) {
@@ -51,10 +51,10 @@ export class Player {
     if (!direction) return;
 
     if (active) {
-      this.activeDirections.add(direction);
+      this.inputHandler.activeDirections.add(direction);
       this.addToStack(direction);
     } else {
-      this.activeDirections.delete(direction);
+      this.inputHandler.activeDirections.delete(direction);
       this.removeFromStack(direction);
     }
   }
@@ -138,39 +138,35 @@ export class Player {
           x: this.position.x + Player.speed,
           y: this.position.y,
         };
-        break;
     }
   }
 
   moveToDirection(world: World) {
-    if (this.directionStack.length === 0) return;
+    if (this.inputHandler.directionStack.length === 0) return;
 
-    let lastDirection = this.directionStack[this.directionStack.length - 1];
+    let lastDirection =
+      this.inputHandler.directionStack[
+        this.inputHandler.directionStack.length - 1
+      ];
     let nextPosition = this.calculeNextPosition(lastDirection);
 
     if (
       this.willCollide(world.walls, nextPosition) &&
-      this.directionStack.length > 1
+      this.inputHandler.directionStack.length > 1
     ) {
-      lastDirection = this.directionStack[this.directionStack.length - 2];
+      lastDirection =
+        this.inputHandler.directionStack[
+          this.inputHandler.directionStack.length - 2
+        ];
       nextPosition = this.calculeNextPosition(lastDirection);
     }
 
-    console.log(lastDirection);
-
     if (
-      this.activeDirections.has(lastDirection) &&
+      this.inputHandler.activeDirections.has(lastDirection) &&
       !this.willCollide(world.walls, nextPosition)
     ) {
       switch (lastDirection) {
         case Direction.UP:
-          console.log(
-            "Colliding UP",
-            this.willCollide(world.walls, {
-              x: this.position.x,
-              y: this.position.y - Player.speed,
-            })
-          );
           this.position.y -= Player.speed;
           break;
         case Direction.LEFT:
