@@ -1,10 +1,11 @@
-import { World } from "../common/types";
+import { MapType, World, WallsTypes } from "../common/types";
+import { isWallsType } from "../utils/util";
 import { Player } from "./objects/player";
 import { Wall } from "./objects/wall";
 
 export class Game {
   context: CanvasRenderingContext2D | undefined;
-  map: string[][] | undefined;
+  map: MapType | undefined;
   canvas: HTMLCanvasElement;
   world: World;
 
@@ -31,22 +32,26 @@ export class Game {
     };
   }
 
-  public addMap(map: string[][]) {
+  public addMap(map: MapType) {
     this.map = map;
 
     this.map?.forEach((row, rowIndex) =>
-      row.forEach((boundary, boundaryIndex) => {
-        switch (boundary) {
-          case "*":
-            this.world.walls.push(
-              new Wall({
-                context: this.context as CanvasRenderingContext2D,
-                position: {
-                  x: Wall.width * boundaryIndex,
-                  y: Wall.height * rowIndex,
-                },
-              })
-            );
+      row.forEach((cell, cellIndex) => {
+        if (isWallsType(cell)) {
+          this.world.walls.push(
+            new Wall({
+              context: this.context as CanvasRenderingContext2D,
+              position: {
+                x: Wall.width * cellIndex,
+                y: Wall.height * rowIndex,
+              },
+              type: cell,
+            })
+          );
+        }
+        // console.log(Object.values(WallsTypes));
+        switch (cell) {
+          case "╔":
             break;
 
           default:
