@@ -1,6 +1,7 @@
 import { Direction, Position, World } from "../../../common/types";
 import { Wall } from "../wall";
 import { InputHandler } from "./input-handler";
+import { MovementController } from "./movement-controller";
 
 type PlayerProps = {
   position: Position;
@@ -148,7 +149,11 @@ export class Player {
       this.inputHandler.directionStack[
         this.inputHandler.directionStack.length - 1
       ];
-    let nextPosition = this.calculeNextPosition(lastDirection);
+    let nextPosition = MovementController.calculeNextPosition(
+      this.position,
+      lastDirection,
+      Player.speed
+    );
 
     if (
       this.willCollide(world.walls, nextPosition) &&
@@ -158,27 +163,18 @@ export class Player {
         this.inputHandler.directionStack[
           this.inputHandler.directionStack.length - 2
         ];
-      nextPosition = this.calculeNextPosition(lastDirection);
+      nextPosition = MovementController.calculeNextPosition(
+        this.position,
+        lastDirection,
+        Player.speed
+      );
     }
 
     if (
       this.inputHandler.activeDirections.has(lastDirection) &&
       !this.willCollide(world.walls, nextPosition)
     ) {
-      switch (lastDirection) {
-        case Direction.UP:
-          this.position.y -= Player.speed;
-          break;
-        case Direction.LEFT:
-          this.position.x -= Player.speed;
-          break;
-        case Direction.DOWN:
-          this.position.y += Player.speed;
-          break;
-        case Direction.RIGHT:
-          this.position.x += Player.speed;
-          break;
-      }
+      this.position = nextPosition;
     }
   }
 }
