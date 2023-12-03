@@ -1,4 +1,5 @@
 import { Position, WallsTypes } from "../../../common/types";
+import { PositionDetails } from "../../game";
 
 type BoundaryProps = {
   position: Position;
@@ -6,6 +7,7 @@ type BoundaryProps = {
   height?: number;
   context: CanvasRenderingContext2D;
   type: WallsTypes;
+  positionDetail: PositionDetails;
 };
 
 export class Wall {
@@ -19,16 +21,42 @@ export class Wall {
   static width = 30;
   static height = 30;
 
-  constructor({ position, context, type }: BoundaryProps) {
+  constructor({ position, context, type, positionDetail }: BoundaryProps) {
     this.position = position;
     this.width = Wall.width;
     this.height = Wall.height;
     this.currentContext = context;
     this.type = type;
-    const selectedImage = this.selectImage(type);
+    const selectedImage = this.selectImageByPosition(positionDetail);
     const image = new Image();
     image.src = `img/${selectedImage}`;
     this.image = image;
+  }
+
+  selectImageByPosition(positionDetail: PositionDetails): string {
+    const above = positionDetail["above"];
+    const below = positionDetail["below"];
+    const left = positionDetail["left"];
+    const right = positionDetail["right"];
+
+    if (!above && !below && !left && !right) return "block.png";
+
+    if (!above && below && !left && right) return "pipeCorner1.png";
+    if (!above && !below && left && !right) return "capRight.png";
+    if (!above && !below && left && right) return "pipeHorizontal.png";
+    if (!above && below && left && !right) return "pipeCorner2.png";
+    if (above && !below && !left && right) return "pipeCorner4.png";
+    if (above && !below && !left && !right) return "capBottom.png";
+    if (!above && below && !left && !right) return "capTop.png";
+    if (!above && !below && !left && right) return "capLeft.png";
+    if (above && below && !left && !right) return "pipeVertical.png";
+    if (above && below && !left && right) return "pipeConnectorRight.png";
+    if (above && !below && left && !right) return "pipeCorner3.png";
+    if (!above && below && left && right) return "pipeConnectorBottom.png";
+    if (above && below && left && !right) return "pipeConnectorLeft.png";
+    if (above && !below && left && right) return "pipeConnectorTop.png";
+
+    return "pipeCross.png";
   }
 
   selectImage(type: WallsTypes): string {
@@ -85,25 +113,11 @@ export class Wall {
       0,
       0,
       this.image.width,
-      this.image.height, // source rectangle
+      this.image.height,
       this.position.x,
       this.position.y,
       this.width,
       this.height
-    ); // destination rectangle
-    // this.currentContext.drawImage(this.image, this.position.x, this.position.y);
+    );
   }
 }
-
-// export const createWall = (
-//   { x, y }: Position,
-//   context: CanvasRenderingContext2D
-// ) => {
-//   new Wall({
-//     context,
-//     position: {
-//       x,
-//       y,
-//     },
-//   });
-// };

@@ -34,11 +34,11 @@ export const wallsTypesMap = {
   leftTrunk: "╟",
   rightTrunk: "╢",
   square: "□",
+  point: "*",
 } as const;
 
 export type WallsTypes = (typeof wallsTypesMap)[keyof typeof wallsTypesMap];
 
-// export type WallsTypes = "╔" | "╗" | "╚" | "╝" | "▁" | "▔" | "▕" | "▏" | "║";
 export type SpaceType = " ";
 
 export type AvailableTypes = WallsTypes | SpaceType;
