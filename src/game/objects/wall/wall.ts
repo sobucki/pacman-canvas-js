@@ -1,36 +1,45 @@
-import { Position, WallsTypes } from "../../../common/types";
+import { MapType, Position } from "../../../common/types";
+import { isWallsType } from "../../../utils/util";
 import { PositionDetails } from "../../game";
+import { SelectorImageController } from "./selector-image-controller";
 
 type BoundaryProps = {
-  position: Position;
   width?: number;
   height?: number;
   context: CanvasRenderingContext2D;
-  type: WallsTypes;
-  positionDetail: PositionDetails;
+  index: Position;
+  map: MapType;
 };
 
 export class Wall {
   position: Position;
-  width: number;
-  height: number;
   currentContext: CanvasRenderingContext2D;
-  image: HTMLImageElement;
-  type: WallsTypes;
+  image?: HTMLImageElement;
 
-  static width = 30;
-  static height = 30;
+  static WIDTH = 30;
+  static HEIGHT = 30;
 
-  constructor({ position, context, type, positionDetail }: BoundaryProps) {
-    this.position = position;
-    this.width = Wall.width;
-    this.height = Wall.height;
+  offsets = [
+    { name: "above", dx: -1, dy: 0 },
+    { name: "below", dx: 1, dy: 0 },
+    { name: "left", dx: 0, dy: -1 },
+    { name: "right", dx: 0, dy: 1 },
+    { name: "topLeft", dx: -1, dy: -1 },
+    { name: "topRight", dx: -1, dy: 1 },
+    { name: "bottomLeft", dx: 1, dy: -1 },
+    { name: "bottomRight", dx: 1, dy: 1 },
+  ];
+
+  constructor({ context, index, map }: BoundaryProps) {
+    this.position = {
+      x: Wall.WIDTH * index.y,
+      y: Wall.HEIGHT * index.x,
+    };
     this.currentContext = context;
-    this.type = type;
-    const selectedImage = this.selectImageByPosition(positionDetail);
-    const image = new Image();
-    image.src = `img/${selectedImage}`;
-    this.image = image;
+    const positionDetails = this.getNeighboringWalls(index.x, index.y, map);
+
+    this.image =
+      SelectorImageController.createImageByWallPosition(positionDetails);
   }
 
   selectImageByPosition(positionDetail: PositionDetails): string {
@@ -59,45 +68,30 @@ export class Wall {
     return "pipeCross.png";
   }
 
-  selectImage(type: WallsTypes): string {
-    switch (type) {
-      case "╔":
-        return "pipeCorner1.png";
+  private isPositionValid(x: number, y: number, map: MapType): boolean {
+    return x >= 0 && x < map.length && y >= 0 && y < map[x].length;
+  }
 
-      case "╗":
-        return "pipeCorner2.png";
+  private getNeighboringWalls(
+    x: number,
+    y: number,
+    map: MapType
+  ): PositionDetails {
+    let details: PositionDetails = { current: map[x][y] };
 
-      case "╝":
-        return "pipeCorner3.png";
+    this.offsets.forEach(({ name, dx, dy }) => {
+      const newX = x + dx;
+      const newY = y + dy;
 
-      case "╚":
-        return "pipeCorner4.png";
+      if (
+        this.isPositionValid(newX, newY, map) &&
+        isWallsType(map[newX][newY])
+      ) {
+        details[name] = map[newX][newY];
+      }
+    });
 
-      case "▏":
-        return "pipeConnectorRight.png";
-
-      case "▕":
-        return "pipeConnectorLeft.png";
-      case "▔":
-        return "pipeConnectorDownwards.png";
-      case "▁":
-        return "pipeConnectorTop.png";
-      case "║":
-        return "pipeVertical.png";
-      case "═":
-        return "pipeHorizontal.png";
-      case "╤":
-        return "capTop.png";
-      case "╧":
-        return "capBottom.png";
-      case "╟":
-        return "capLeft.png";
-      case "╢":
-        return "capRight.png";
-      case "□":
-        return "block.png";
-    }
-    return "pipeCross.png";
+    return details;
   }
 
   draw() {
@@ -105,19 +99,20 @@ export class Wall {
     this.currentContext.fillRect(
       this.position.x,
       this.position.y,
-      this.width,
-      this.height
+      Wall.WIDTH,
+      Wall.HEIGHT
     );
-    this.currentContext.drawImage(
-      this.image,
-      0,
-      0,
-      this.image.width,
-      this.image.height,
-      this.position.x,
-      this.position.y,
-      this.width,
-      this.height
-    );
+    if (this.image)
+      this.currentContext.drawImage(
+        this.image,
+        0,
+        0,
+        this.image.width,
+        this.image.height,
+        this.position.x,
+        this.position.y,
+        Wall.WIDTH,
+        Wall.HEIGHT
+      );
   }
 }

@@ -42,8 +42,8 @@ export class Game {
       player: new Player({
         context: this.context,
         position: {
-          x: Wall.width + Wall.width / 2,
-          y: Wall.height + Wall.height / 2,
+          x: Wall.WIDTH + Wall.WIDTH / 2,
+          y: Wall.HEIGHT + Wall.HEIGHT / 2,
         },
       }),
     };
@@ -55,52 +55,19 @@ export class Game {
     map.forEach((row, rowIndex) => {
       row.forEach((cell, colIndex) => {
         if (isWallsType(cell)) {
-          const positionDetails = this.getNeighboringWalls(
-            rowIndex,
-            colIndex,
-            map
-          );
-
           this.world.walls.push(
             new Wall({
               context: this.context as CanvasRenderingContext2D,
-              position: {
-                x: Wall.width * colIndex,
-                y: Wall.height * rowIndex,
+              index: {
+                y: colIndex,
+                x: rowIndex,
               },
-              type: cell,
-              positionDetail: positionDetails,
+              map,
             })
           );
         }
       });
     });
-  }
-
-  private isPositionValid(x: number, y: number, map: MapType): boolean {
-    return x >= 0 && x < map.length && y >= 0 && y < map[x].length;
-  }
-
-  private getNeighboringWalls(
-    x: number,
-    y: number,
-    map: MapType
-  ): PositionDetails {
-    let details: PositionDetails = { current: map[x][y] };
-
-    offsets.forEach(({ name, dx, dy }) => {
-      const newX = x + dx;
-      const newY = y + dy;
-
-      if (
-        this.isPositionValid(newX, newY, map) &&
-        isWallsType(map[newX][newY])
-      ) {
-        details[name] = map[newX][newY];
-      }
-    });
-
-    return details;
   }
 
   public animate() {

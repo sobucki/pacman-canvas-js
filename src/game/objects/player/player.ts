@@ -105,9 +105,9 @@ export class Player {
     const circleBottom = circlePosition.y + this.radius - 4;
 
     const wallLeft = wall.position.x;
-    const wallRight = wall.position.x + wall.width;
+    const wallRight = wall.position.x + Wall.WIDTH;
     const wallTop = wall.position.y;
-    const wallBottom = wall.position.y + wall.height;
+    const wallBottom = wall.position.y + Wall.HEIGHT;
 
     const isCollidingHorizontally =
       circleRight >= wallLeft && circleLeft <= wallRight;
