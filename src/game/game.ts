@@ -1,24 +1,7 @@
-import { MapType, World, WallsTypes } from "../common/types";
+import { MapType, World } from "../common/types";
 import { isWallsType } from "../utils/util";
 import { Player } from "./objects/player";
 import { Wall } from "./objects/wall";
-
-export interface PositionDetails {
-  current: string;
-  [key: string]: string | undefined;
-}
-
-// Deslocamentos para verificar cada direção e diagonal
-const offsets = [
-  { name: "above", dx: -1, dy: 0 },
-  { name: "below", dx: 1, dy: 0 },
-  { name: "left", dx: 0, dy: -1 },
-  { name: "right", dx: 0, dy: 1 },
-  { name: "topLeft", dx: -1, dy: -1 },
-  { name: "topRight", dx: -1, dy: 1 },
-  { name: "bottomLeft", dx: 1, dy: -1 },
-  { name: "bottomRight", dx: 1, dy: 1 },
-];
 
 export class Game {
   context: CanvasRenderingContext2D | undefined;

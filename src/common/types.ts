@@ -13,6 +13,22 @@ export enum Direction {
   RIGHT = "RIGHT",
 }
 
+export type PositionAround =
+  | "above"
+  | "below"
+  | "left"
+  | "right"
+  | "topLeft"
+  | "topRight"
+  | "bottomLeft"
+  | "bottomRight";
+
+export type Offset = {
+  name: PositionAround;
+  dx: number;
+  dy: number;
+};
+
 export type World = {
   player: Player;
   walls: Array<Wall>;
@@ -43,3 +59,7 @@ export type SpaceType = " ";
 
 export type AvailableTypes = WallsTypes | SpaceType;
 export type MapType = AvailableTypes[][];
+
+export type DynamicPositionBooleanMap = {
+  [key in PositionAround]?: boolean;
+};

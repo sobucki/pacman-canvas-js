@@ -1,8 +1,8 @@
-import { PositionDetails } from "../../game";
+import { DynamicPositionBooleanMap } from "../../../common/types";
 
 export class SelectorImageController {
   static createImageByWallPosition(
-    position: PositionDetails
+    position: DynamicPositionBooleanMap
   ): HTMLImageElement | undefined {
     const above = position["above"];
     const below = position["below"];

@@ -1,6 +1,10 @@
-import { MapType, Position } from "../../../common/types";
+import {
+  DynamicPositionBooleanMap,
+  MapType,
+  Offset,
+  Position,
+} from "../../../common/types";
 import { isWallsType } from "../../../utils/util";
-import { PositionDetails } from "../../game";
 import { SelectorImageController } from "./selector-image-controller";
 
 type BoundaryProps = {
@@ -19,7 +23,7 @@ export class Wall {
   static WIDTH = 30;
   static HEIGHT = 30;
 
-  offsets = [
+  offsets: Offset[] = [
     { name: "above", dx: -1, dy: 0 },
     { name: "below", dx: 1, dy: 0 },
     { name: "left", dx: 0, dy: -1 },
@@ -36,36 +40,9 @@ export class Wall {
       y: Wall.HEIGHT * index.x,
     };
     this.currentContext = context;
-    const positionDetails = this.getNeighboringWalls(index.x, index.y, map);
+    const wallsAround = this.getNeighboringWalls(index.x, index.y, map);
 
-    this.image =
-      SelectorImageController.createImageByWallPosition(positionDetails);
-  }
-
-  selectImageByPosition(positionDetail: PositionDetails): string {
-    const above = positionDetail["above"];
-    const below = positionDetail["below"];
-    const left = positionDetail["left"];
-    const right = positionDetail["right"];
-
-    if (!above && !below && !left && !right) return "block.png";
-
-    if (!above && below && !left && right) return "pipeCorner1.png";
-    if (!above && !below && left && !right) return "capRight.png";
-    if (!above && !below && left && right) return "pipeHorizontal.png";
-    if (!above && below && left && !right) return "pipeCorner2.png";
-    if (above && !below && !left && right) return "pipeCorner4.png";
-    if (above && !below && !left && !right) return "capBottom.png";
-    if (!above && below && !left && !right) return "capTop.png";
-    if (!above && !below && !left && right) return "capLeft.png";
-    if (above && below && !left && !right) return "pipeVertical.png";
-    if (above && below && !left && right) return "pipeConnectorRight.png";
-    if (above && !below && left && !right) return "pipeCorner3.png";
-    if (!above && below && left && right) return "pipeConnectorBottom.png";
-    if (above && below && left && !right) return "pipeConnectorLeft.png";
-    if (above && !below && left && right) return "pipeConnectorTop.png";
-
-    return "pipeCross.png";
+    this.image = SelectorImageController.createImageByWallPosition(wallsAround);
   }
 
   private isPositionValid(x: number, y: number, map: MapType): boolean {
@@ -76,8 +53,8 @@ export class Wall {
     x: number,
     y: number,
     map: MapType
-  ): PositionDetails {
-    let details: PositionDetails = { current: map[x][y] };
+  ): DynamicPositionBooleanMap {
+    let details: DynamicPositionBooleanMap = {};
 
     this.offsets.forEach(({ name, dx, dy }) => {
       const newX = x + dx;
@@ -87,7 +64,7 @@ export class Wall {
         this.isPositionValid(newX, newY, map) &&
         isWallsType(map[newX][newY])
       ) {
-        details[name] = map[newX][newY];
+        details[name] = true;
       }
     });
 
